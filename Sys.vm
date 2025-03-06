@@ -40,104 +40,80 @@ label END
 push temp 1
 return
 
-function Sys.computeParity 4
-push constant 0
-pop temp 0
-push constant 15
-pop temp 1
 
-label loopStart
-push temp 1
-push constant 0
-eq
-if-goto loopEnd
+function Sys.computeParity 2
+    push constant 0
+    pop temp 0
+    
+    push constant 0
+    pop temp 1
 
-push argument 0
-push constant 1
-and
-push constant 0
-eq
-not
-if-goto bitIsOne
+label LOOP
+    push temp 1
+    push constant 14
+    gt
+    if-goto END_LOOP
 
-goto skipToggle
+    push constant 1
+    push temp 1
+    call Sys.shiftLeft 4
+    pop temp 2
 
-label bitIsOne
-push temp 0
-push constant 1
-call Sys.xor 2
-pop temp 0
+    push argument 0
+    push temp 2
+    and
+    pop temp 3
 
-label skipToggle
-push argument 0
-push constant 1
-gt
-if-goto shiftRight
-push argument 0
-push constant 1
-sub
-pop argument 0
-goto continueLoop
+    push temp 3
+    push constant 0
+    eq
+    if-goto SKIP_XOR
 
-label shiftRight
-push argument 0
-push argument 0
-add
-push constant 1
-sub
-pop argument 0
+    push temp 0
+    push constant 1
+    call Sys.xor 2
+    pop temp 0
 
-label continueLoop
-push temp 1
-push constant 1
-sub
-pop temp 1
-goto loopStart
+label SKIP_XOR
+    push temp 1
+    push constant 1
+    add
+    pop temp 1
 
-label loopEnd
-push temp 0
-return
+    goto LOOP
 
-function Sys.encode 4
-push argument 0
-pop temp 0
-push argument 0
-call Sys.computeParity 1
-pop temp 1
-push temp 0
-push constant 32767
-and
-pop temp 2
-push temp 1
-if-goto setBit
-goto pushResult
+label END_LOOP
+    push temp 0
+    return
 
-label setBit
-push temp 2
-push temp 2
-push temp 2
-push temp 2
-push temp 2
-push temp 2
-push temp 2
-push temp 2
-push temp 2
-push temp 2
-push temp 2
-push temp 2
-push temp 2
-push temp 2
-push temp 2
-call Sys.shiftLeft 16
-or
-pop temp 2
+function Sys.encode 2
+    call Sys.computeParity 1
+    push argument 0
+    pop temp 0
+    push temp 0
+    push constant 32768
+    and
+    push constant 0
+    eq
+    if-goto SET_HIGH_BIT
+    push temp 0
+    push constant 32768
+    not
+    and
+    pop temp 1
+    push temp 1
+    return
 
-label pushResult
-push temp 2
-return
+label SET_HIGH_BIT
+    push temp 0
+    push constant 32768
+    or
+    pop temp 1
+    push temp 1
+    return
 
 function Sys.init 0
-    call Sys.encode 1
+call Sys.encode 1
 
 label WHILE
     goto WHILE
